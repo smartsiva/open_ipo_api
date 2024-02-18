@@ -4,8 +4,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import re
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
+# from selenium.webdriver.chrome.service import Service as ChromeService
+# from webdriver_manager.chrome import ChromeDriverManager
 
 app = Flask(__name__)
 
@@ -16,9 +16,7 @@ def main():
 @app.route('/fetch_mainline')
 def retrieve_mainline_data():
     def initialise_chrome_driver():
-        options = Options()
-        options.add_argument("--headless")
-        return webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+        return webdriver.Chrome()
 
     url = "https://www.investorgain.com/report/live-ipo-gmp/331/ipo/"
 

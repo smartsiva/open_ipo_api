@@ -48,5 +48,6 @@ def retrieve_mainline_data():
                         row_dict[data_label] = each.text_content()
 
                 results.append(row_dict)
-
+        if results == []:
+            return "No Mainline IPO is Currently Open, Please Check Tomorrow!"
         return results

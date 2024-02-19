@@ -51,7 +51,7 @@ def retrieve_mainline_data():
                 results.append(row_dict)
         if results == []:
             return {"Message" : "No Mainline IPO is Currently Open, Please Check Tomorrow!"}
-        return json.dumps(results, indent = 4)
+        return results
 
 @app.route('/fetch_upcoming')
 def retrieve_upcoming_ipo():
@@ -85,4 +85,4 @@ def retrieve_upcoming_ipo():
                     results.append(row_dict)
     if results == []:
         return {"Message" : "No Upcoming IPO, Please Check Tomorrow!"}
-    return json.dumps(results, indent = 4)
+    return results

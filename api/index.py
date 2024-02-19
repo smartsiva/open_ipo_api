@@ -7,8 +7,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    return "Hello World!"
-
+    return "Welcome To IPO Alerts, Try /fetch_mainline or /fetch_upcoming"
+    
 
 @app.route('/fetch_mainline')
 def retrieve_mainline_data():
@@ -49,7 +49,7 @@ def retrieve_mainline_data():
 
                 results.append(row_dict)
         if results == []:
-            return "No Mainline IPO is Currently Open, Please Check Tomorrow!"
+            return {"Message" : "No Mainline IPO is Currently Open, Please Check Tomorrow!"}
         return results
 
 @app.route('/fetch_upcoming')
@@ -62,31 +62,26 @@ def retrieve_upcoming_ipo():
     if response.status_code == 200:
         # Parse the HTML content using lxml
         tree = html.fromstring(response.content)
-
+    
         # Find the table element
         table_element = tree.xpath('//table[@id="mainTable"]')[0]
-
+    
         # Extract rows from the table
         rows = table_element.xpath('.//tr')
-
+    
         results = []
         for row in rows:
-            # Check if the row has the class 'color-green'
             row_dict = {}
-
-            # Extract columns from the row
             columns = row.xpath('.//td')
-            for each in columns:
-                data_label = each.get('data-label')
-                if data_label == "IPO":
-                    # Use regular expressions to extract specific information
-                    if "Upcoming" in each.text_content():
-                        row_dict["company_name"] = each.text_content().split("Upcoming")[0]
-
-                        row_dict[data_label] = each.text_content()
-
+            if columns:
+                if "Upcoming" in columns[0].text_content():
+                    for each in columns:
+                        data_label = each.get('data-label')
+                        if data_label == "IPO":
+                            row_dict["Company_Name"] = each.text_content().split("Upcoming")[0]
+                        elif data_label in {"Open", "Close", "Est Listing", "Price"}:
+                            row_dict[data_label] = each.text_content()
                     results.append(row_dict)
-
-        if results == []:
-            return "No Upcoming IPO is Currently Open, Please Check Tomorrow!"
-        return results
+    if results == []:
+        return {"Message" : "No Upcoming IPO, Please Check Tomorrow!"}
+    return results

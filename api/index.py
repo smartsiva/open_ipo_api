@@ -2,6 +2,7 @@ from flask import Flask
 import requests
 from lxml import html
 import re
+import json
 
 app = Flask(__name__)
 
@@ -50,7 +51,7 @@ def retrieve_mainline_data():
                 results.append(row_dict)
         if results == []:
             return {"Message" : "No Mainline IPO is Currently Open, Please Check Tomorrow!"}
-        return results
+        return json.dumps(results, indent = 4)
 
 @app.route('/fetch_upcoming')
 def retrieve_upcoming_ipo():
@@ -84,4 +85,4 @@ def retrieve_upcoming_ipo():
                     results.append(row_dict)
     if results == []:
         return {"Message" : "No Upcoming IPO, Please Check Tomorrow!"}
-    return results
+    return json.dumps(results, indent = 4)

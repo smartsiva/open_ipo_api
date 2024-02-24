@@ -81,7 +81,7 @@ def retrieve_mainline_data():
         return results
 
 @app.route('/fetch_mainline2', methods=['GET'])
-def retrieve_mainline_data():
+def retrieve_mainline_data2():
     url = "https://www.investorgain.com/report/ipo-subscription-live/333/ipo/"
     main_table = fetch_data(url)
 

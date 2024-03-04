@@ -22,17 +22,19 @@ def fetch_data(url):
             return None
 
 def extract_ipo_data(df):
-    df[['Company Name', 'GMP', 'Estimated Listing Gain']] = df['IPO'].str.extract(r'(.*)GMP:₹(\d+) \(([\d.]+%)\)[O]')
-    df = df.rename(columns={'RII': 'Retail Subs Ratio'})
+    df[['companyName', 'gmp', 'listingGain']] = df['IPO'].str.extract(r'(.*)GMP:₹(\d+) \(([\d.]+%)\)[O]')
+    df = df.rename(columns={'RII': 'retailSubsRatio',
+                            'Close Date': 'closeDate',
+                            'IPO Price': 'ipoPrice'})
     return df
 
 def create_api_response(df):
-    subset_columns = ['Company Name', 'IPO Price', 'GMP', 'Estimated Listing Gain', 'Close Date', 'Retail Subs Ratio']
+    subset_columns = ['companyName', 'gmp', 'listingGain', 'retailSubsRatio','closeDate', 'ipoPrice']
     subset_df = df[subset_columns].copy()
     result_dict = subset_df.to_dict(orient='records')
 
     return {
-        'ipo_data': result_dict,
+        'ipoData': result_dict,
         'message': 'API Response Successful',
         'status': 'success'
     }

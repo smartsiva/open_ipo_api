@@ -50,7 +50,7 @@ def retrieve_mainline_data():
     main_table = fetch_data(url)
 
     if main_table is not None:
-        open_ipo = main_table[main_table['IPO'].str.endswith('O')].copy()
+        open_ipo = main_table[main_table['IPO'].str.endswith('O', 'CT')].copy()
         open_ipo = extract_ipo_data(open_ipo)
 
         api_response = create_api_response(open_ipo)

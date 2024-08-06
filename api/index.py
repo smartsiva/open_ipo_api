@@ -22,7 +22,7 @@ def fetch_data(url):
             return None
 
 def extract_ipo_data(df):
-    df[['companyName', 'gmp', 'listingGain']] = df['IPO'].str.extract(r'(.*)GMP:₹(\d+) \(([\d.]+%)\)[O|CT]')
+    df[['companyName', 'gmp', 'listingGain']] = df['IPO'].str.extract(r'(.*)GMP:₹([\d.]+) \(([\d.]+%)\)(?:O|CT)$')
     df = df.rename(columns={'RII': 'retailSubsRatio',
                             'Close Date': 'closeDate',
                             'IPO Price': 'ipoPrice'})

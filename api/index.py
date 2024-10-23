@@ -10,8 +10,8 @@ CORS(app, resources={r"/*": {"origins": "*"}}, allow_headers=["Content-Type", "A
 
 def fetch_data(url):
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.89 Safari/537.36'
+}
 
     with requests.get(url, headers=headers) as response:
         if response.status_code == 200:

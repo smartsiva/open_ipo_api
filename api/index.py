@@ -26,7 +26,7 @@ def fetch_data(url):
     with requests.get(url, headers=headers) as response:
         if response.status_code == 200:
             logging.info(f"Successfully fetched data from {url}")
-            return pd.read_html(response.content, attrs={'id': "mainTable"})[0]
+            return pd.read_html(response.content)[0]
         else:
             logging.error(f"Failed to fetch data from {url}. Status Code: {response.status_code}")
             return None

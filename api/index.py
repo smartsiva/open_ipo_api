@@ -121,7 +121,7 @@ def retrieve_mainline_data_2():
                 gmp = 0 if row['IPO GMP'] == '₹-' else row['IPO GMP'].replace('₹', '').replace(',', '')
                 open_date, close_date = convert_date_range(row['IPO Date'])
                 ipo_data = {
-                    'companyName': row['Current IPOs'],
+                    'companyName': row['Current IPOs'].replace("(Mainboard)", "").strip(),
                     'gmp': int(gmp), # Remove ₹ and comma
                     'ipoPrice': int(ipo_price),  # Convert to int
                     'listingGain': row['Listing Gain'],

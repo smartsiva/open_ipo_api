@@ -57,10 +57,12 @@ def retrieve_mainline_data():
     else:
         return jsonify({'message': 'Failed to fetch data', 'status': 'error'}), 500
 
-
 @app.route('/fetch_upcoming')
 def retrieve_upcoming_ipo():
     url = "https://www.investorgain.com/report/live-ipo-gmp/331/ipo/"
+
+    # Initialize results to avoid UnboundLocalError
+    results = []
 
     # Send an HTTP request to the webpage
     response = requests.get(url)
@@ -68,18 +70,23 @@ def retrieve_upcoming_ipo():
     if response.status_code == 200:
         # Parse the HTML content using lxml
         tree = html.fromstring(response.content)
-    
+
         # Find the table element
-        table_element = tree.xpath('//table[@id="mainTable"]')[0]
-    
+        table_element = tree.xpath('//table[@id="mainTable"]')
+
+        if not table_element:
+            return jsonify({'message': 'Table not found', 'status': 'error'}), 404
+
+        table_element = table_element[0]
+
         # Extract rows from the table
         rows = table_element.xpath('.//tr')
-    
-        results = []
+
         for row in rows:
             row_dict = {}
             columns = row.xpath('.//td')
             if columns:
+                # Extract relevant columns
                 if "Upcoming" in columns[0].text_content():
                     for each in columns:
                         data_label = each.get('data-label')
@@ -88,6 +95,18 @@ def retrieve_upcoming_ipo():
                         elif data_label in {"Open", "Close", "Est Listing", "Price"}:
                             row_dict[data_label] = each.text_content()
                     results.append(row_dict)
-    if results == []:
-        return {"Message" : "No Upcoming IPO, Please Check Tomorrow!"}
-    return results
+
+        # If no results found, return a message
+        if not results:
+            return jsonify({"message": "No Upcoming IPO, Please Check Tomorrow!", "status": "error"}), 404
+
+        # Convert results into API format with 'ipoData'
+        api_response = {
+            'ipoData': results,
+            'message': 'API Response Successful',
+            'status': 'success'
+        }
+        return jsonify(api_response)
+    else:
+        return jsonify({"message": "Failed to fetch data", "status": 'error'}), 500
+

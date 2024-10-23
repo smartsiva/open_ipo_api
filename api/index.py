@@ -18,7 +18,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 def fetch_data(url):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.89 Safari/537.36',
-        'Referer': 'https://www.investorgain.com',
         'Accept-Language': 'en-US,en;q=0.9',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8'
     }
@@ -54,12 +53,41 @@ def create_api_response(df):
         'status': 'success'
     }
 
+def add_ordinal_suffix(day):
+    """Add ordinal suffix to a day number."""
+    if day.endswith('11') or day.endswith('12') or day.endswith('13'):
+        return f"{day}th"
+    elif day.endswith('1'):
+        return f"{day}st"
+    elif day.endswith('2'):
+        return f"{day}nd"
+    elif day.endswith('3'):
+        return f"{day}rd"
+    else:
+        return f"{day}th"
+
+
+def convert_date_range(date_range):
+    """Convert date range from 'DD-DD MMM YYYY' to 'Dth MMM YYYY' format."""
+    pattern = r'(\d{1,2})-(\d{1,2}) (\w+) (\d{4})'
+
+    match = re.match(pattern, date_range)
+    if match:
+        start_day, end_day, month, year = match.groups()
+
+        start_date = f"{add_ordinal_suffix(start_day)} {month} {year}"
+        end_date = f"{add_ordinal_suffix(end_day)} {month} {year}"
+
+        return start_date,end_date
+    else:
+        return "-","-"
+
 @app.route("/")
 def hello_world():
     logging.info("Accessed root endpoint")
     return "Welcome To IPO Alerts, Try /fetch_mainline or /fetch_upcoming"
 
-@app.route('/fetch_mainline', methods=['GET'])
+@app.route('/fetch_mainline_old', methods=['GET'])
 def retrieve_mainline_data():
     url = "https://www.investorgain.com/report/ipo-subscription-live/333/ipo/"
     main_table = fetch_data(url)
@@ -75,6 +103,47 @@ def retrieve_mainline_data():
         logging.error("Failed to retrieve mainline IPO data")
         return jsonify({'message': 'Failed to fetch data', 'status': 'error'}), 500
 
+@app.route('/fetch_mainline', methods=['GET'])
+def retrieve_mainline_data_2():
+    url = "https://ipowatch.in/ipo-grey-market-premium-latest-ipo-gmp/"
+    main_table = fetch_data(url)
+    main_table.columns = main_table.iloc[0]
+    
+    # Remove the first row from the DataFrame
+    main_table = main_table.drop(main_table.index[0])
+    if main_table is not None:
+        transformed_data = []
+    
+        for index, row in main_table.iterrows():
+            # Extract values and convert as needed
+            if "mainboard" in row['Current IPOs'].lower():
+                ipo_price = 0 if row['Price Band'] == '₹-' else row['Price Band'].replace('₹', '').replace(',', '')
+                gmp = 0 if row['IPO GMP'] == '₹-' else row['IPO GMP'].replace('₹', '').replace(',', '')
+                open_date, close_date = convert_date_range(row['IPO Date'])
+                ipo_data = {
+                    'companyName': row['Current IPOs'],
+                    'gmp': int(gmp), # Remove ₹ and comma
+                    'ipoPrice': int(ipo_price),  # Convert to int
+                    'listingGain': row['Listing Gain'],
+                    'retailSubsRatio': 'N/A',  # Assuming a placeholder value for retail subscription ratio
+                    'closeDate': close_date,
+                    'openDate': open_date# Assuming this is the closing date
+                }
+    
+                transformed_data.append(ipo_data)
+    
+        # Prepare the final JSON structure
+        result = {
+            'ipoData': transformed_data,
+            'message': 'API Response Successful',
+            'status': 'success'
+        }
+        return jsonify(result)
+    
+    # Transform and print the JSON
+    else:
+        jsonify({'message': 'Failed to fetch data', 'status': 'error'}), 500
+    
 @app.route('/fetch_upcoming')
 def retrieve_upcoming_ipo():
     url = "https://www.investorgain.com/report/live-ipo-gmp/331/ipo/"

@@ -6,8 +6,7 @@ import pandas as pd
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": { "origins": "*","Access-Control-Allow-Headers":"*",
-        "X-CSRF-Token":"*", "X-Requested-With":"*", "Accept":"*", "Accept-Version":"*", "Content-Length":"*", "Content-MD5":"*", "Content-Type":"*", "Date":"*", "X-Api-Version":"*"}})
+CORS(app, resources={r"/*": {"origins": "*"}}, allow_headers=["Content-Type", "Authorization", "X-Requested-With"])
 
 def fetch_data(url):
     headers = {

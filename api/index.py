@@ -67,16 +67,16 @@ def add_ordinal_suffix(day):
         return f"{day}th"
 
 
-def convert_date_range(date_range):
+def convert_date_range(days, month):
     """Convert date range from 'DD-DD MMM YYYY' to 'Dth MMM YYYY' format."""
-    pattern = r'(\d{1,2})-(\d{1,2}) (\w+) (\d{4})'
+    pattern = r'(\d{1,2})-(\d{1,2})'
 
-    match = re.match(pattern, date_range)
+    match = re.match(pattern, days)
     if match:
-        start_day, end_day, month, year = match.groups()
+        start_day, end_day = match.groups()
 
-        start_date = f"{add_ordinal_suffix(start_day)} {month} {year}"
-        end_date = f"{add_ordinal_suffix(end_day)} {month} {year}"
+        start_date = f"{add_ordinal_suffix(start_day)} {month}"
+        end_date = f"{add_ordinal_suffix(end_day)} {month}"
 
         return start_date,end_date
     else:
@@ -115,16 +115,17 @@ def retrieve_mainline_data_2():
         transformed_data = []
     
         for index, row in main_table.iterrows():
-            # Extract values and convert as needed
-            if "mainboard" in row['Current IPOs'].lower():
-                ipo_price = 0 if row['Price Band'] == '₹-' else row['Price Band'].replace('₹', '').replace(',', '')
-                gmp = 0 if row['IPO GMP'] == '₹-' else row['IPO GMP'].replace('₹', '').replace(',', '')
-                open_date, close_date = convert_date_range(row['IPO Date'])
+        # Extract values and convert as needed
+            if "mainline" in row['Type'].lower():
+                ipo_price = 0 if '–' in row['Price'] or "-" in row['Price'] else row['Price'].replace('₹', '').replace(',', '')
+                gmp = 0 if '–' in row['IPO GMP'] or "-" in row['IPO GMP'] else row['IPO GMP'].replace('₹', '').replace(',', '')
+                gain = "0%" if '–' in row['Gain'] or "-" in row['Gain'] else row['Gain']
+                open_date, close_date = convert_date_range(row['Current IPOs'].split(" ")[-2], row['Current IPOs'].split(" ")[-1])
                 ipo_data = {
-                    'companyName': row['Current IPOs'].replace("(Mainboard)", "").strip(),
+                    'companyName': " ".join(row['Current IPOs'].split(" ")[:-2]),
                     'gmp': int(gmp), # Remove ₹ and comma
                     'ipoPrice': int(ipo_price),  # Convert to int
-                    'listingGain': row['Listing Gain'],
+                    'listingGain': gain,
                     'retailSubsRatio': 'N/A',  # Assuming a placeholder value for retail subscription ratio
                     'closeDate': close_date,
                     'openDate': open_date# Assuming this is the closing date
